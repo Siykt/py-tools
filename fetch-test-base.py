@@ -37,32 +37,42 @@ def getKeywordSearch(keyword: str, month: str = None, year: str = None):
         return
 
     soup = BeautifulSoup(res.text, 'html.parser')
-    linkList = soup.select('body > div.main.clearfix.layout.msf > div.l-list.fl > div.bot.clearfix > ul li a')
-    titleList = []
-    detailLinks = []
-    print('查询到的结果有: ')
-    for [i, linkDom] in enumerate(linkList):
-        link = linkDom.get('href')
-        title = linkDom.get('title')
-        titleList.append(title)
-        detailLinks.append(link)
-        print(f'{i + 1}. {title}')
 
-    try:
-        input("是否继续? (回车继续/ctrl+c取消)")
-        # 线程上限
-        MAX_Thread = 24
-        rt = 0
-        for [i, link] in enumerate(detailLinks):
-            title = titleList[i]
-            t = Thread(target=downloadTestBasePDF, name=title, args=(link, title, keyword))
-            t.start()
-            rt += 1
-            if rt == MAX_Thread:
-                t.join()
-                rt = 0
-    except:
-        pass
+    # 分页
+    pageLinkList = soup.select('body > div.main.clearfix.layout.msf > div.l-list.fl > div.fy.msf > a')[2:-2]
+    page = len(pageLinkList)
+    curPage = 0
+    print(f'查询的结果共有有 {page} 页')
+    for curPage in range(page):
+        titleList = []
+        detailLinks = []
+        linkList = soup.select('body > div.main.clearfix.layout.msf > div.l-list.fl > div.bot.clearfix > ul li a')
+        print(f'第{curPage + 1}页信息为:')
+        for [i, linkDom] in enumerate(linkList):
+            link = linkDom.get('href')
+            title = linkDom.get('title')
+            titleList.append(title)
+            detailLinks.append(link)
+            print(f'{i + 1}. {title}')
+
+        isSkip = False
+        try:
+            if not isSkip:
+                isSkip = input("是否下载? (回车继续/ctrl+c取消/y不再提示)") == 'y'
+            # 线程上限
+            MAX_Thread = 24
+            rt = 0
+            for [i, link] in enumerate(detailLinks):
+                title = titleList[i]
+                t = Thread(target=downloadTestBasePDF, name=title, args=(link, title, keyword))
+                t.start()
+                rt += 1
+                if rt == MAX_Thread:
+                    t.join()
+                    rt = 0
+            input("是否继续? (回车继续/ctrl+c取消)")
+        except:
+            break
 
 
 def downloadTestBasePDF(url: str, filename: str, prefix: str):
