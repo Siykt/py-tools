@@ -39,10 +39,9 @@ def getKeywordSearch(keyword: str, month: str = None, year: str = None):
     soup = BeautifulSoup(res.text, 'html.parser')
 
     # 分页
-    pageLinkList = soup.select('body > div.main.clearfix.layout.msf > div.l-list.fl > div.fy.msf > a')[2:-2]
-    page = len(pageLinkList)
-    curPage = 0
+    page = len(soup.select('body > div.main.clearfix.layout.msf > div.l-list.fl > div.fy.msf > a')[2:-2])
     print(f'查询的结果共有有 {page} 页')
+    isSkip = False
     for curPage in range(page):
         titleList = []
         detailLinks = []
@@ -55,13 +54,13 @@ def getKeywordSearch(keyword: str, month: str = None, year: str = None):
             detailLinks.append(link)
             print(f'{i + 1}. {title}')
 
-        isSkip = False
         try:
             if not isSkip:
-                isSkip = input("是否下载? (回车继续/ctrl+c取消/y不再提示)") == 'y'
+                isSkip = input("是否下载? (回车继续 / ctrl+c取消 / y不再提示)") == 'y'
             # 线程上限
             MAX_Thread = 24
             rt = 0
+            t = None
             for [i, link] in enumerate(detailLinks):
                 title = titleList[i]
                 t = Thread(target=downloadTestBasePDF, name=title, args=(link, title, keyword))
@@ -70,7 +69,10 @@ def getKeywordSearch(keyword: str, month: str = None, year: str = None):
                 if rt == MAX_Thread:
                     t.join()
                     rt = 0
-            input("是否继续? (回车继续/ctrl+c取消)")
+            res = requests.post(url=f'{FETCH_URL}{SEARCH_URI}?page={curPage + 1}', data=data, headers=headers)
+            soup = BeautifulSoup(res.text, 'html.parser')
+            titleList = []
+            detailLinks = []
         except:
             break
 
