@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # -------------------------------------------
-# 历年真题下载工具
+# 历年自考真题下载工具
 
 from pathlib import Path
 import requests
@@ -17,6 +17,9 @@ REQUEST_FAKER_HEADER = {
     'sec-ch-ua': '"Chromium";v="106", "Google Chrome";v="106", "Not;A=Brand";v="99"',
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36',
 }
+
+# 下载目录
+DOWNLOAD_DIR = Path('.') / 'testBase' / 'data'
 
 
 def getKeywordSearch(keyword: str, month: str = None, year: str = None):
@@ -84,7 +87,7 @@ def downloadTestBasePDF(url: str, filename: str, prefix: str):
     src = f"https://{pdfEl.get('src')[2:]}"
     print(f'正在下载 {filename}')
     res = requests.get(src)
-    p = Path('.') / 'testBase' / 'data' / prefix
+    p = DOWNLOAD_DIR / prefix
     if not p.exists():
         p.mkdir(parents=True)
     with open(p / f'{filename}.pdf', 'wb') as f:
@@ -92,4 +95,4 @@ def downloadTestBasePDF(url: str, filename: str, prefix: str):
 
 
 if __name__ == "__main__":
-    getKeywordSearch(input('请输入课程关键词: '))
+    getKeywordSearch(input('请输入自考课程关键词: '))
