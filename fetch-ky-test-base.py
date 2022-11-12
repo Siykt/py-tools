@@ -30,6 +30,10 @@ def getTestBaseInfo(url='https://www.eol.cn/e_html/gk/gkst/', page=0):
         description = testBaseInfo.select('.head-mid')[0].text.replace("\n", "")
         print(f'{title}: {description}')
         courseList = testBaseInfo.select('.gkzt-xueke li')
+        prefix = f'{year}/{title}'
+        p = DOWNLOAD_DIR / prefix
+        if not p.exists():
+            p.mkdir(parents=True)
         downloadArgs = []
         for course in courseList:
             courseName = next(course.select('.word-xueke')[0].children)
@@ -39,8 +43,6 @@ def getTestBaseInfo(url='https://www.eol.cn/e_html/gk/gkst/', page=0):
                 linkText = link.text
                 linkUrl = link['href']
                 if linkUrl:
-                    prefix = f'{year}/{title}'
-                    createDir(prefix)
                     downloadArgs.append((linkUrl, f'{courseName}-{linkText}', prefix))
         t = None
         rt = 0
@@ -55,12 +57,6 @@ def getTestBaseInfo(url='https://www.eol.cn/e_html/gk/gkst/', page=0):
     nextPage = page + 1
     if nextPage < otherPageLen:
         getTestBaseInfo(url=otherYearTestBaseLinks[0].get('href'), page=nextPage)
-
-
-def createDir(prefix: str):
-    p = DOWNLOAD_DIR / prefix
-    if not p.exists():
-        p.mkdir(parents=True)
 
 
 def downloadTestBaseDoc(url: str, filename: str, prefix: Path):
