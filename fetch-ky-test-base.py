@@ -35,7 +35,6 @@ def getTestBaseInfo(url='https://www.eol.cn/e_html/gk/gkst/', page=0):
             courseName = next(course.select('.word-xueke')[0].children)
             # 该学科的真题/答案/解析/估分链接
             courseLinks = course.select('.xueke-a a')
-            rt = 0
             for link in courseLinks:
                 linkText = link.text
                 linkUrl = link['href']
@@ -44,6 +43,7 @@ def getTestBaseInfo(url='https://www.eol.cn/e_html/gk/gkst/', page=0):
                     createDir(prefix)
                     downloadArgs.append((linkUrl, f'{courseName}-{linkText}', prefix))
         t = None
+        rt = 0
         for args in downloadArgs:
             t = Thread(target=downloadTestBaseDoc, name=title, args=args)
             t.start()
