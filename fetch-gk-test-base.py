@@ -6,7 +6,8 @@
 from pathlib import Path
 import requests
 from bs4 import BeautifulSoup
-from threading import Thread
+from utils.dir import createDir
+from utils.t import Threads
 
 
 # 下载目录
@@ -25,16 +26,14 @@ def getTestBaseInfo(url='https://www.eol.cn/e_html/gk/gkst/', page=0):
     otherPageLen = len(otherYearTestBaseLinks)
     year = otherYearTestBaseLinks[page].text
     print(f'正在获取 {year} 历年高考真题...')
+    ts = Threads(downloadTestBaseDoc, MAX_THREAD_NUM)
     for testBaseInfo in testBaseInfoList:
         title = testBaseInfo.select('.head-fl span')[0].text
         description = testBaseInfo.select('.head-mid')[0].text.replace("\n", "")
         print(f'{title}: {description}')
         courseList = testBaseInfo.select('.gkzt-xueke li')
         prefix = f'{year}/{title}'
-        p = DOWNLOAD_DIR / prefix
-        if not p.exists():
-            p.mkdir(parents=True)
-        downloadArgs = []
+        createDir(DOWNLOAD_DIR / prefix)
         for course in courseList:
             courseName = next(course.select('.word-xueke')[0].children)
             # 该学科的真题/答案/解析/估分链接
@@ -43,17 +42,8 @@ def getTestBaseInfo(url='https://www.eol.cn/e_html/gk/gkst/', page=0):
                 linkText = link.text
                 linkUrl = link['href']
                 if linkUrl:
-                    downloadArgs.append((linkUrl, f'{courseName}-{linkText}', prefix))
-        t = None
-        rt = 0
-        for args in downloadArgs:
-            t = Thread(target=downloadTestBaseDoc, name=title, args=args)
-            t.start()
-            rt += 1
-            if rt == MAX_THREAD_NUM:
-                t.join()
-                rt = 0
-        t.join()
+                    ts.add(linkUrl, f'{courseName}-{linkText}', prefix)
+        ts.starAndJoin()
     nextPage = page + 1
     if nextPage < otherPageLen:
         getTestBaseInfo(url=otherYearTestBaseLinks[0].get('href'), page=nextPage)
