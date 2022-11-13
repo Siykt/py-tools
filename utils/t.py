@@ -14,7 +14,10 @@ class Threads():
         if self.autoStart:
             t.start()
         if len(self.threads) == self.maxThreadNum:
-            self.starAndJoin()
+            if self.autoStart:
+                self.join()
+            else:
+                self.starAndJoin()
 
     def star(self):
         for t in self.threads:
