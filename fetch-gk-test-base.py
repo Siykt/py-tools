@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # -------------------------------------------
-# 历年考研真题下载工具
+# 历年高考真题下载工具
 
 from pathlib import Path
 import requests
@@ -10,7 +10,7 @@ from threading import Thread
 
 
 # 下载目录
-DOWNLOAD_DIR = Path('.') / 'data' / 'testKYBase'
+DOWNLOAD_DIR = Path('.') / 'data' / 'testGKBase'
 # 线程上限
 MAX_THREAD_NUM = 24
 
@@ -24,7 +24,7 @@ def getTestBaseInfo(url='https://www.eol.cn/e_html/gk/gkst/', page=0):
     otherYearTestBaseLinks = testBaseInfoList[0].select('.head-fr a')
     otherPageLen = len(otherYearTestBaseLinks)
     year = otherYearTestBaseLinks[page].text
-    print(f'正在获取 {year} 历年考研真题...')
+    print(f'正在获取 {year} 历年高考真题...')
     for testBaseInfo in testBaseInfoList:
         title = testBaseInfo.select('.head-fl span')[0].text
         description = testBaseInfo.select('.head-mid')[0].text.replace("\n", "")
