@@ -22,7 +22,7 @@ REQUEST_FAKER_HEADER = {
 DOWNLOAD_DIR = Path('.') / 'testBase' / 'data'
 
 
-def getKeywordSearch(keyword: str, month: str = None, year: str = None):
+def getKeywordSearch(keyword: str, month: str = None, year: str = None, skipAsk=False):
     data = {
         'KeyWord': keyword.encode('gbk'),
         'month': month,
@@ -44,7 +44,7 @@ def getKeywordSearch(keyword: str, month: str = None, year: str = None):
     # 分页
     page = len(soup.select('body > div.main.clearfix.layout.msf > div.l-list.fl > div.fy.msf > a')[2:-2])
     print(f'查询的结果共有有 {page} 页')
-    isSkip = False
+    isSkip = skipAsk
     for curPage in range(page):
         titleList = []
         detailLinks = []
@@ -59,7 +59,7 @@ def getKeywordSearch(keyword: str, month: str = None, year: str = None):
 
         try:
             if not isSkip:
-                isSkip = input("是否下载? (回车继续 / ctrl+c取消 / y不再提示)") == 'y'
+                isSkip = input("是否下载? (回车继续 / ctrl+c取消 / y不再提示): ") == 'y'
             # 线程上限
             MAX_Thread = 24
             rt = 0
@@ -99,4 +99,6 @@ def downloadTestBasePDF(url: str, filename: str, prefix: str):
 
 
 if __name__ == "__main__":
-    getKeywordSearch(input('请输入自考课程关键词: '))
+    keywords = input('请输入自考课程关键词: ').split(',')
+    for keyword in keywords:
+        getKeywordSearch(keyword.strip(), skipAsk=True)
