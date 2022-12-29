@@ -83,8 +83,12 @@ def getKeywordSearch(keyword: str, month: str = None, year: str = None):
 def downloadTestBasePDF(url: str, filename: str, prefix: str):
     res = requests.get(url=url, headers=REQUEST_FAKER_HEADER)
     soup = BeautifulSoup(res.text, 'html.parser')
-    pdfEl = soup.select('#viewerPlaceHolderDel iframe')[0]
-    src = f"https://{pdfEl.get('src')[2:]}"
+    pdfEl = soup.select('#viewerPlaceHolder object')
+    if not pdfEl:
+        print('无法获取PDF元素, 请检查元素是否更换:', url)
+        return
+    pdfEl = pdfEl[0]
+    src = f"https://{pdfEl.get('data')[2:]}"
     print(f'正在下载 {filename}')
     res = requests.get(src)
     p = DOWNLOAD_DIR / prefix
